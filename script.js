@@ -988,12 +988,12 @@ document.getElementById("modalPause")
   });
 
 document.getElementById("btnRestartFromGame").addEventListener("click", () => {
-  if (confirm("Начать игру сначала? Текущий уровень будет сброшен.")) {
+  if (
+    confirm("Вернуться на главный экран? Текущая игра будет сброшена.")
+  ) {
     stopTimerLoop();
-    showEncourageNext(() => {
-      resetGameStateForNewRun();
-      goRoundIntro(0);
-    });
+    resetGameStateForNewRun();
+    goStart();
   }
 });
 
