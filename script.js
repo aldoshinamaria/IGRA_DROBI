@@ -467,6 +467,75 @@ function showGameToast(message) {
   }, TOAST_MS);
 }
 
+// --- Звуки пары (Web Audio API, файлы не нужны) ---
+let pairAudioCtx = null;
+
+function ensurePairAudioContext() {
+  try {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return null;
+    if (!pairAudioCtx) pairAudioCtx = new Ctx();
+    if (pairAudioCtx.state === "suspended") {
+      void pairAudioCtx.resume();
+    }
+    return pairAudioCtx;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * @param {AudioContext} ctx
+ * @param {number} freq Гц
+ * @param {number} when Время на шкале ctx (с)
+ * @param {number} duration с
+ * @param {"sine"|"triangle"|"square"} type
+ * @param {number} gainPeak 0..1
+ */
+function playBeep(ctx, freq, when, duration, type = "sine", gainPeak = 0.12) {
+  const osc = ctx.createOscillator();
+  const g = ctx.createGain();
+  osc.type = type;
+  osc.frequency.setValueAtTime(freq, when);
+  g.gain.setValueAtTime(0.0001, when);
+  g.gain.linearRampToValueAtTime(gainPeak, when + 0.012);
+  g.gain.exponentialRampToValueAtTime(0.0001, when + duration);
+  osc.connect(g);
+  g.connect(ctx.destination);
+  osc.start(when);
+  osc.stop(when + duration + 0.03);
+}
+
+function playPairSuccessSound() {
+  const ctx = ensurePairAudioContext();
+  if (!ctx) return;
+  const go = () => {
+    const t = ctx.currentTime;
+    playBeep(ctx, 523.25, t, 0.1, "sine", 0.1);
+    playBeep(ctx, 659.25, t + 0.08, 0.12, "sine", 0.1);
+  };
+  if (ctx.state === "suspended") {
+    void ctx.resume().then(go);
+  } else {
+    go();
+  }
+}
+
+function playPairErrorSound() {
+  const ctx = ensurePairAudioContext();
+  if (!ctx) return;
+  const go = () => {
+    const t = ctx.currentTime;
+    playBeep(ctx, 196, t, 0.11, "triangle", 0.09);
+    playBeep(ctx, 147, t + 0.1, 0.14, "triangle", 0.075);
+  };
+  if (ctx.state === "suspended") {
+    void ctx.resume().then(go);
+  } else {
+    go();
+  }
+}
+
 // --- Состояние игры ---
 
 const SCREENS = {
@@ -711,6 +780,11 @@ function stopTimerLoop() {
 }
 
 function updateProgressDots() {
+  const fill = document.getElementById("roundProgressFill");
+  if (fill) {
+    const pct = ((currentRound + 1) / ROUNDS.length) * 100;
+    fill.style.width = `${Math.min(100, Math.max(0, pct))}%`;
+  }
   const dots = document.querySelectorAll(".progress__dot");
   dots.forEach((dot, i) => {
     dot.classList.remove("progress__dot--done", "progress__dot--current");
@@ -725,7 +799,8 @@ function renderBoard() {
   const frag = document.createDocumentFragment();
   deck.forEach((c, index) => {
     const li = document.createElement("li");
-    li.className = "card-wrap";
+    li.className = "card-wrap card-wrap--enter";
+    li.style.setProperty("--enter-delay", `${index * 70}ms`);
     li.dataset.index = String(index);
     const btn = document.createElement("button");
     btn.type = "button";
@@ -779,6 +854,7 @@ function onCardClick(index) {
   document.getElementById("statMovesRound").textContent = String(roundMoves);
   document.getElementById("statMovesTotal").textContent = String(gameMovesTotal);
   if (ok) {
+    playPairSuccessSound();
     showGameToast(pickRandom(TOAST_OK));
     [i0, i1].forEach((ix) => {
       const el = document.querySelector(`.card-wrap[data-index="${ix}"] .card`);
@@ -790,6 +866,7 @@ function onCardClick(index) {
       setTimeout(() => showRoundComplete(), 500);
     }
   } else {
+    playPairErrorSound();
     showGameToast(pickRandom(TOAST_FAIL));
     [i0, i1].forEach((ix) => {
       const el = document.querySelector(`.card-wrap[data-index="${ix}"] .card`);

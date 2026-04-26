@@ -42,47 +42,59 @@
 
     <!-- Игровой экран -->
     <section class="screen screen--play" id="screenPlay" hidden>
-      <header class="top-bar">
-        <div class="stats" id="statsBar">
-          <div class="stat-pill" title="Текущий уровень">
-            <span class="stat-pill__label">Уровень</span>
-            <span class="stat-pill__val" id="statRound">1 / 20</span>
+      <div class="play-layout">
+        <header class="play-top">
+          <div class="top-bar">
+            <div class="stats" id="statsBar">
+              <div class="stat-pill" title="Текущий уровень">
+                <span class="stat-pill__label">Уровень</span>
+                <span class="stat-pill__val" id="statRound">1 / 20</span>
+              </div>
+              <div class="stat-pill" title="Время на текущем уровне">
+                <span class="stat-pill__label">Сейчас</span>
+                <span class="stat-pill__val" id="statTimeRound">0:00</span>
+              </div>
+              <div class="stat-pill" title="Вся игра">
+                <span class="stat-pill__label">Всё</span>
+                <span class="stat-pill__val" id="statTimeGame">0:00</span>
+              </div>
+              <div class="stat-pill" title="Ходы на этом уровне">
+                <span class="stat-pill__label">Ходы</span>
+                <span class="stat-pill__val" id="statMovesRound">0</span>
+              </div>
+              <div class="stat-pill" title="Ходы (всего)">
+                <span class="stat-pill__label">Всего</span>
+                <span class="stat-pill__val" id="statMovesTotal">0</span>
+              </div>
+            </div>
+            <div class="round-title-wrap">
+              <h2 class="round-title" id="playRoundTitle"></h2>
+            </div>
           </div>
-          <div class="stat-pill" title="Время на текущем уровне">
-            <span class="stat-pill__label">Сейчас</span>
-            <span class="stat-pill__val" id="statTimeRound">0:00</span>
-          </div>
-          <div class="stat-pill" title="Вся игра">
-            <span class="stat-pill__label">Всё</span>
-            <span class="stat-pill__val" id="statTimeGame">0:00</span>
-          </div>
-          <div class="stat-pill" title="Ходы на этом уровне">
-            <span class="stat-pill__label">Ходы</span>
-            <span class="stat-pill__val" id="statMovesRound">0</span>
-          </div>
-          <div class="stat-pill" title="Ходы (всего)">
-            <span class="stat-pill__label">Всего</span>
-            <span class="stat-pill__val" id="statMovesTotal">0</span>
-          </div>
-        </div>
-        <div class="round-title-wrap">
-          <h2 class="round-title" id="playRoundTitle"></h2>
-        </div>
-        <div class="top-actions">
-          <button type="button" class="btn btn--ghost" id="btnPause">Пауза</button>
-          <button type="button" class="btn btn--ghost" id="btnRestartFromGame">С начала</button>
-        </div>
-      </header>
 
-      <div class="progress">
-        <div class="progress__track progress__track--many" id="roundProgress" aria-hidden="true"></div>
+          <div class="progress">
+            <div class="progress-rail" aria-hidden="true">
+              <div class="progress-fill" id="roundProgressFill"></div>
+            </div>
+            <div class="progress__track progress__track--many" id="roundProgress" aria-hidden="true"></div>
+          </div>
+        </header>
+
+        <main class="board-wrap">
+          <div class="board-stage">
+            <div class="game-toast" id="gameToast" hidden role="status" aria-live="polite"></div>
+            <ul class="board" id="board" role="list"></ul>
+          </div>
+          <p class="board-hint" id="boardHint">Откройте две карточки. Удачи!</p>
+        </main>
+
+        <footer class="play-bottom">
+          <div class="top-actions play-bottom__actions">
+            <button type="button" class="btn btn--ghost" id="btnPause">Пауза</button>
+            <button type="button" class="btn btn--ghost" id="btnRestartFromGame">С начала</button>
+          </div>
+        </footer>
       </div>
-
-      <main class="board-wrap">
-        <ul class="board" id="board" role="list"></ul>
-        <p class="board-hint" id="boardHint">Откройте две карточки. Удачи!</p>
-        <div class="game-toast" id="gameToast" hidden role="status" aria-live="polite"></div>
-      </main>
     </section>
 
     <!-- Завершение раунда -->
@@ -139,7 +151,7 @@
 
     <!-- Пауза -->
     <div class="modal" id="modalPause" hidden>
-      <div class="modal__backdrop" data-close="pause"></div>
+      <div class="modal__backdrop overlay" data-close="pause"></div>
       <div class="modal__panel" role="dialog" aria-modal="true" aria-labelledby="pauseTitle">
         <h3 id="pauseTitle">Пауза</h3>
         <p>Таймер остановлен. Продолжайте, когда будете готовы.</p>
